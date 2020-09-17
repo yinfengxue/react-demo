@@ -3,9 +3,10 @@
  * @version: 1.0.0
  * @Date: 2020-09-11 16:52:07
  * @Description: todolist
- * @LastEditTime: 2020-09-15 21:53:26
+ * @LastEditTime: 2020-09-16 18:48:43
  */
 import React, { Component, Fragment } from 'react';
+import TodoItem from './todo-item'; 
 import './style.css';
 
 // react不是操作dom，而是操作数据，感知数据变化
@@ -58,19 +59,32 @@ class TodoList extends Component {
             className='input'
             value={this.state.inputValue}
             onChange={this.handleInputChange.bind(this)}
+            // onChange={this.handleInputChange}
           />
-          <button onClick={this.handleBtnClick.bind(this)}>提交</button>
+          <button
+            onClick={this.handleBtnClick.bind(this)}
+            style={{ marginLeft: 16 }}
+          >
+            提交
+          </button>
         </div>
         <ul>
           {
             this.state.list.map((item, index) => {
               return (
-                <li
+                // 父组件通过属性给子组件传递数据
+                <TodoItem
                   key={index}
-                  onClick={this.handleItemDelete.bind(this, index)}
-                  // 外层{}代表内层是个JS表达式，内层{}代表是个对象
-                  dangerouslySetInnerHTML={{__html:item}}
+                  content={item}
+                  index={index}
+                  deleteItem={this.handleItemDelete.bind(this)}
                 />
+                // <li
+                //   key={index}
+                //   onClick={this.handleItemDelete.bind(this, index)}
+                //   // 外层{}代表内层是个JS表达式，内层{}代表是个对象
+                //   dangerouslySetInnerHTML={{__html:item}}
+                // />
               )
             })
           }
