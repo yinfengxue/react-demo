@@ -3,94 +3,74 @@
  * @version: 1.0.0
  * @Date: 2020-09-11 16:52:07
  * @Description: todolist
- * @LastEditTime: 2020-09-16 18:48:43
+ * @LastEditTime: 2020-09-17 10:40:40
  */
 import React, { Component, Fragment } from 'react';
-import TodoItem from './todo-item'; 
+import 'antd/dist/antd.css';
+import { Input, Button, List } from 'antd';
+import store from './store';
 import './style.css';
 
-// react不是操作dom，而是操作数据，感知数据变化
-// react是响应的意思，感知到数据的变化，自动将数据映射到页面上
 class TodoList extends Component {
-
-  // 在类里面，一定会有一个constructor构造函数，会最优先被执行
-  constructor () {
+  constructor() {
     super();
-    // 定义数据
-    this.state = {
-      inputValue: '',
-      list: [],
-    }
+    this.state = store.getState();
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleStoreChange = this.handleStoreChange.bind(this);
+    this.handleBtnClick = this.handleBtnClick.bind(this);
+    store.subscribe(this.handleStoreChange); // 组件订阅store， store里面的数据一旦变化，就会执行handleStoreChange方法
+  }
+  
+  render() {
+    console.log('store.getState是', store, store.getState());
+    return (
+      <Fragment>
+        <div style={{ marginLeft: 30, marginTop: 30 }}>
+          <Input
+            value={this.state.inputValue}
+            placeholder="输入"
+            style={{ width: 300 }}
+            onChange={this.handleInputChange}
+          />
+          <Button
+            type="primary"
+            style={{ marginLeft: 16 }}
+            onClick={this.handleBtnClick}
+          >
+            提交
+          </Button>
+        </div>
+        <List
+          style={{ marginTop: 16, width: 300, marginLeft: 30 }}
+          bordered
+          dataSource={this.state.list}
+          renderItem={item => <List.Item>{item}</List.Item>}
+        />
+      </Fragment>
+    )
   }
 
   handleInputChange(e) {
-    this.setState({
-      inputValue: e.target.value,
-    })
+    // 要告诉store我要做什么事
+    const action = {
+      type: 'change_input_value',
+      value: e.target.value,
+    }
+    console.log('input输入框', e.target.value);
+    // 将action传递给store
+    store.dispatch(action);
   }
-
+  
   handleBtnClick() {
-    this.setState({
-      list: [...this.state.list, this.state.inputValue],
-      inputValue: '',
-    })
+    const action = {
+      type: 'add_todo_item',
+    };
+    store.dispatch(action);
   }
 
-  handleItemDelete(idx) {
-    // immmutable
-    // state不允许我们做任何的改变
-    const list = [...this.state.list];
-    list.splice(idx, 1);
-    this.setState({
-      list: list,
-    })
-  }
-
-  render() {
-    // JSX(在js中写html标签，就叫做JSX语法)
-    return (
-      // Fragment是一个占位符，可以隐藏最外层的标签
-      <Fragment>
-        <div>
-          <label htmlFor="insertArea">输入内容：</label>
-          <input
-            id="insertArea"
-            // style={{ border: '1px solid red' }}
-            className='input'
-            value={this.state.inputValue}
-            onChange={this.handleInputChange.bind(this)}
-            // onChange={this.handleInputChange}
-          />
-          <button
-            onClick={this.handleBtnClick.bind(this)}
-            style={{ marginLeft: 16 }}
-          >
-            提交
-          </button>
-        </div>
-        <ul>
-          {
-            this.state.list.map((item, index) => {
-              return (
-                // 父组件通过属性给子组件传递数据
-                <TodoItem
-                  key={index}
-                  content={item}
-                  index={index}
-                  deleteItem={this.handleItemDelete.bind(this)}
-                />
-                // <li
-                //   key={index}
-                //   onClick={this.handleItemDelete.bind(this, index)}
-                //   // 外层{}代表内层是个JS表达式，内层{}代表是个对象
-                //   dangerouslySetInnerHTML={{__html:item}}
-                // />
-              )
-            })
-          }
-        </ul>
-      </Fragment>
-    )
+  handleStoreChange() {
+    this.setState(store.getState());
+    console.log('store changed');
   }
 }
 
